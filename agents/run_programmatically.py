@@ -7,25 +7,24 @@ for a high school science competition.
 
 import asyncio
 import os
-import sys
-from pathlib import Path
 from dotenv import load_dotenv
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types
 
-# Add parent directory to path to allow importing from agents package
-# This allows the script to be run from the agents directory or parent directory
-current_dir = Path(__file__).parent
-parent_dir = current_dir.parent
-if str(parent_dir) not in sys.path:
-    sys.path.insert(0, str(parent_dir))
+# Import the agent you defined in agent.py
+from agent import root_agent
 
-from agents.agent import root_agent
 
-# Load environment variables from parent directory (where .env file is located)
-env_path = parent_dir / ".env"
-load_dotenv(dotenv_path=env_path)
+# Load environment variables from .env file
+load_dotenv()
+
+# # Load environment variables from parent directory (where .env file is located)
+# # The .env file is in the parent directory, not in the agents directory
+# current_dir = Path(__file__).parent
+# parent_dir = current_dir.parent
+# env_path = parent_dir / ".env"
+# load_dotenv(dotenv_path=env_path)
 
 async def run_research_proposal_system():
     """

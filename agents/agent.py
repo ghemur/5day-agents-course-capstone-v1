@@ -9,36 +9,42 @@ This system uses a team of specialized agents to:
 5. Write and iteratively refine a research proposal
 """
 
+import logging
+import os
 from google.adk.agents import Agent, SequentialAgent, ParallelAgent, LoopAgent
-from google.adk.runners import InMemoryRunner
-from google.adk.tools import AgentTool, FunctionTool, google_search, ToolContext
+from google.adk.tools import FunctionTool, google_search
 from google.genai import types
-import asyncio
-from typing import Dict, Any
+
+# ============================================================================
+# Logging Configuration
+# ============================================================================
+
+# Get the directory where this script is located
+_CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_FILE = os.path.join(_CURRENT_DIR, "agent.log")
+
+# Configure logging with DEBUG log level for comprehensive observability
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.DEBUG,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    force=True,  # Force reconfiguration in case logging was already configured
+)
+
+# Configure ADK loggers to capture framework-level logs
+adk_logger = logging.getLogger("google.adk")
+adk_logger.setLevel(logging.DEBUG)
+
+# Get a logger for this module
+module_logger = logging.getLogger(__name__)
+module_logger.info("Research Proposal Agentic System - Logging initialized")
+module_logger.debug(f"Log file: {LOG_FILE}")
+
+print(f"✅ Logging configured - log file: {LOG_FILE}")
 
 # ============================================================================
 # Custom Tools
 # ============================================================================
-
-async def search_current_research(topic: str, tool_context: ToolContext) -> str:
-    """
-    Search for current active research in a specific topic area.
-    
-    This tool helps identify topics that are currently of interest to the research community.
-    
-    Args:
-        topic: The topic area to search for current research (e.g., "renewable energy", "AI ethics")
-        tool_context: The tool context for state management
-        
-    Returns:
-        A summary of current research activity in the topic area
-    """
-    # Use google_search to find current research
-    search_query = f"current research {topic} 2024 2025 active research projects"
-    # Note: In a real implementation, you might want to use a more sophisticated search
-    # For now, we'll return a placeholder that the agent can use
-    return f"Search results for current research in {topic} would be retrieved here. The agent should use google_search tool for actual results."
-
 
 def exit_proposal_loop():
     """
@@ -417,11 +423,14 @@ proposal_development_phase = SequentialAgent(
 root_agent = SequentialAgent(
     name="ResearchProposalSystem",
     sub_agents=[
-        parallel_research_phase,      # Step 1: Parallel research
+        parallel_research_phase,       # Step 1: Parallel research
         analysis_phase,                # Step 2: Analyze criteria
         topic_intersection_phase,      # Step 3: Intersect topics
         topic_proposal_phase,          # Step 4: Propose topic
         proposal_development_phase,    # Step 5: Write initial proposal and refine
     ],
 )
+
+module_logger.info("All agents and workflow orchestration complete")
+module_logger.info(f"Root agent '{root_agent.name}' created with {len(root_agent.sub_agents)} phases")
 
